@@ -85,3 +85,15 @@ async def career_counseling_endpoint(analysis_result: Dict[str, Any]):
         return {"counseling": counseling_advice}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to provide counseling: {e}")
+
+@app.post("/api/career-counseling/contact")
+async def contact_career_advisor(contact_data: Dict[str, str]):
+    """
+    Endpoint to handle career advisor contact form submission.
+    """
+    # In a real application, you would implement logic to send an email or notification
+    # to a career advisor with the contact_data.
+    print(f"Received message for career advisor from {contact_data.get('name')} ({contact_data.get('email')}):")
+    print(f"Message: {contact_data.get('message')}")
+    
+    return {"message": "Your message has been sent to a career advisor. They will get back to you shortly."}
