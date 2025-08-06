@@ -14,21 +14,87 @@ interface AuthTabsProps {
 const AuthTabs = ({ userType, defaultTab = "login" }: AuthTabsProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+    company: "",
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // Redirect based on user type
+
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Login failed. Please check your credentials.");
+      }
+
+      const data = await response.json();
+      console.log(data.message);
+      
+      // Redirect based on user type after successful login
       if (userType === "jobseeker") {
         window.location.href = "/dashboard";
       } else {
         window.location.href = "/employer-dashboard";
       }
-    }, 1500);
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignupSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          password: formData.password,
+          company: userType === "employer" ? formData.company : undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Account creation failed. Please try again.");
+      }
+
+      const data = await response.json();
+      console.log(data.message);
+      
+      // Redirect after successful signup
+      if (userType === "jobseeker") {
+        window.location.href = "/dashboard";
+      } else {
+        window.location.href = "/employer-dashboard";
+      }
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const isEmployer = userType === "employer";
@@ -56,7 +122,7 @@ const AuthTabs = ({ userType, defaultTab = "login" }: AuthTabsProps) => {
             </TabsList>
             
             <TabsContent value="login" className="space-y-4 mt-6">
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleLoginSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <div className="relative">
@@ -67,6 +133,7 @@ const AuthTabs = ({ userType, defaultTab = "login" }: AuthTabsProps) => {
                       placeholder="Enter your email"
                       className="pl-10"
                       required
+                      onChange={handleInputChange}
                     />
                   </div>
                 </div>
@@ -81,6 +148,7 @@ const AuthTabs = ({ userType, defaultTab = "login" }: AuthTabsProps) => {
                       placeholder="Enter your password"
                       className="pl-10 pr-10"
                       required
+                      onChange={handleInputChange}
                     />
                     <Button
                       type="button"
@@ -129,7 +197,7 @@ const AuthTabs = ({ userType, defaultTab = "login" }: AuthTabsProps) => {
             </TabsContent>
             
             <TabsContent value="signup" className="space-y-4 mt-6">
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSignupSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First Name</Label>
@@ -140,6 +208,7 @@ const AuthTabs = ({ userType, defaultTab = "login" }: AuthTabsProps) => {
                         placeholder="John"
                         className="pl-10"
                         required
+                        onChange={handleInputChange}
                       />
                     </div>
                   </div>
@@ -149,6 +218,7 @@ const AuthTabs = ({ userType, defaultTab = "login" }: AuthTabsProps) => {
                       id="lastName"
                       placeholder="Doe"
                       required
+                      onChange={handleInputChange}
                     />
                   </div>
                 </div>
@@ -163,6 +233,7 @@ const AuthTabs = ({ userType, defaultTab = "login" }: AuthTabsProps) => {
                       placeholder="john@example.com"
                       className="pl-10"
                       required
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     />
                   </div>
                 </div>
@@ -174,6 +245,7 @@ const AuthTabs = ({ userType, defaultTab = "login" }: AuthTabsProps) => {
                       id="company"
                       placeholder="Your Company"
                       required
+                      onChange={handleInputChange}
                     />
                   </div>
                 )}
@@ -188,6 +260,7 @@ const AuthTabs = ({ userType, defaultTab = "login" }: AuthTabsProps) => {
                       placeholder="Create a strong password"
                       className="pl-10 pr-10"
                       required
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     />
                     <Button
                       type="button"
