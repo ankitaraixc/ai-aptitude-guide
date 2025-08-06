@@ -19,7 +19,7 @@ const Navigation = () => {
 
   const navItems = [
     { href: "/", label: "Home", icon: BrainCircuit },
-    { href: "/jobs", label: "Find Jobs", icon: Search },
+    { href: "/find-jobs", label: "Find Jobs", icon: Search },
     { href: "/resume-analysis", label: "Resume Analysis", icon: FileText },
     { href: "/career-counseling", label: "Career Guidance", icon: TrendingUp },
   ];
